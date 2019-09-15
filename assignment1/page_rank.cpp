@@ -106,5 +106,5 @@ int main(int argc, char *argv[])
     std::cout << "Created graph\n";
     pageRankSerial(g, max_iterations);
 
-    return 1;
+    return 0;
 }
