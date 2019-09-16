@@ -99,5 +99,5 @@ int main(int argc, char *argv[])
 
     triangleCountSerial(g);
 
-    return 0;
+    return 1;
 }

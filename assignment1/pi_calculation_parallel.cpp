@@ -39,6 +39,7 @@ void get_points_in_circle(uint n, uint random_seed, int tid )//std::promise<int>
     points_generated[tid] = n;
     circle_points[tid] = circlePointsForEachThread;
     circle_count.fetch_add(circlePointsForEachThread);
+    time_taken[tid] = thread_timer.stop();
 }
 void piCalculation(uint n, uint totalThreads)
 {
