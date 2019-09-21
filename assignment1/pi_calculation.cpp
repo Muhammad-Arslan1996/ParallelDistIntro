@@ -39,14 +39,14 @@ void piCalculation(uint n)
     double pi_value = 4.0 * (double)circle_points / (double)n;
     // -------------------------------------------------------------------
     time_taken = serial_timer.stop();
-
-    std::cout << "thread_id, points_generated, circle_points, time_taken\n";
+    
+    std::cout << "thread_id, points_generated, circle_points, time_taken\n"; 
     // Print the above statistics for each thread
     // Example output for 2 threads:
     // thread_id, points_generated, circle_points, time_taken
     // 1, 100, 90, 0.12
     // 0, 100, 89, 0.12
-
+    
     // Print the overall statistics
     std::cout << "Total points generated : " << n << "\n";
     std::cout << "Total points in circle : " << circle_points << "\n";
@@ -66,11 +66,11 @@ int main(int argc, char *argv[])
     auto cl_options = options.parse(argc, argv);
     uint n_points = cl_options["nPoints"].as<uint>();
     uint n_workers = cl_options["nWorkers"].as<uint>();
-    std::cout << std::fixed;
+    std::cout << std::fixed;    
     std::cout << "Number of points : " << n_points << "\n";
     std::cout << "Number of workers : " << n_workers << "\n";
 
     piCalculation(n_points);
-
+    
     return 0;
 }

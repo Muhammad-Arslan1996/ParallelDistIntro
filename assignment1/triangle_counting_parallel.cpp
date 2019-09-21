@@ -8,9 +8,6 @@
 #include "graph.h"
 
 std::atomic <long> triangle_count;
-std::vector <int> thread_ids;
-std::vector <long> triangleCountEachThread;
-std::vector <double> time_taken;
 
 uintV countTriangles(uintV *array1, uintE len1, uintV *array2, uintE len2, uintV u, uintV v)
 {
@@ -39,10 +36,7 @@ uintV countTriangles(uintV *array1, uintE len1, uintV *array2, uintE len2, uintV
   }
   return count;
 }
-void processEdge(Graph *g, uintV start, uintV end, uint tid){
-
-  std::cout << "thread"<< tid << "start:" << start << "\n";
-  std::cout << "thread"<< tid <<  "end:" << end << "\n";
+void processEdge(Graph *g, uintV start, uintV end, uint tid, double* thread_time, long* triangleCountEachThread){
   timer thread_timer;
   thread_timer.start();
   long local_triangle_count = 0;
@@ -61,10 +55,9 @@ void processEdge(Graph *g, uintV start, uintV end, uint tid){
                                            v);
       }
   }
-  thread_ids[tid] = tid;
-  triangleCountEachThread[tid] = local_triangle_count;
+  *triangleCountEachThread = local_triangle_count;
   triangle_count.fetch_add(local_triangle_count);
-  time_taken[tid] = thread_timer.stop();
+  *thread_time = thread_timer.stop();
 
 }
 void triangleCountParallel(Graph &g, uint n_workers)
@@ -72,6 +65,11 @@ void triangleCountParallel(Graph &g, uint n_workers)
   uintV n = g.n_;
   double total_time_taken = 0.0;
   timer t1;
+  double thread_time_taken[n_workers];
+  for(int i =0; i< n_workers; i++){
+    thread_time_taken[i] = 0.0;
+  }
+  long triangleCountEachThread[n_workers];
   uintV start;
   uintV end;
   //Graph tempGraph = g;
@@ -86,11 +84,11 @@ void triangleCountParallel(Graph &g, uint n_workers)
   for(uint i = 0; i < n_workers - 1; i++){
     start = (n/n_workers)*i;
     end = ((i+1)*(n/n_workers));
-    t[i] = std::thread(processEdge, &g, start, end, i); // i is tid
+    t[i] = std::thread(processEdge, &g, start, end, i, &thread_time_taken[i], &triangleCountEachThread[i]); // i is tid
   }
   start = n/n_workers*(n_workers-1);
   end = n;
-  t[n_workers -1] = std::thread(processEdge, &g, start, end, n_workers -1);
+  t[n_workers -1] = std::thread(processEdge, &g, start, end, n_workers -1, &thread_time_taken[n_workers-1], &triangleCountEachThread[n_workers-1]);
   // -------------------------------------------------------------------
   // Here, you can just print the number of non-unique triangles counted by each thread
   // std::cout << "thread_id, triangle_count, time_taken\n";
@@ -102,8 +100,8 @@ void triangleCountParallel(Graph &g, uint n_workers)
   std::cout << "thread_id, triangle_count, time_taken\n";
   for(uint i = 0; i < n_workers; i++){
     t[i].join();
-    std::cout <<thread_ids[i]<< ", " << triangleCountEachThread[i] << ", "
-    << std::setprecision(TIME_PRECISION) << time_taken[i]<<"\n";
+    std::cout <<i<< ", " << triangleCountEachThread[i] << ", "
+    << std::setprecision(TIME_PRECISION) << thread_time_taken[i]<<"\n";
   }
   total_time_taken = t1.stop();
 
@@ -132,11 +130,7 @@ int main(int argc, char *argv[])
   g.read_graph_from_binary<int>(input_file_path);
   std::cout << "Created graph\n";
 
-  thread_ids.reserve(n_workers);
-  triangleCountEachThread.reserve(n_workers);
-  time_taken.reserve(n_workers);
-
   triangleCountParallel(g, n_workers);
 
-  return 1;
+  return 0;
 }
