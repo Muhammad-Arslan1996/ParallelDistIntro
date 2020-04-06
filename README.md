@@ -1,4 +1,4 @@
-#Parallel Programming
+# Parallel Programming
 
 This repository contains parallel solutions for the following clasical problems
 1. Monte Carlo Pi Estimation
